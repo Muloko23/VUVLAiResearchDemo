@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VULVAi — Research Repository</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --plum:#3D1A4A;--plum-mid:#5C2D6E;--plum-light:#7B3F8C;
+  --magenta:#C4327A;--mag-pale:#F9E8F2;
+  --navy:#0F1A2E;--navy-mid:#1A2A42;
+  --teal:#0D7A6E;--teal-light:#E0F5F2;--teal-pale:#F0FAF9;
+  --amber:#B45309;--amber-light:#FEF3C7;
+  --green:#166534;--green-light:#DCFCE7;
+  --blue:#1D4ED8;--blue-light:#DBEAFE;
+  --rose:#9F1239;--rose-light:#FFE4E6;
+  --surface:#F5F0F8;--lavender:#EDE4F2;--border:#E2D4EB;
+  --text:#1A0A22;--text-mid:#4A3560;--text-muted:#9B82A8;
+  --white:#fff;--cream:#FDFAF8;
+}
+body{font-family:'Helvetica Neue',Arial,sans-serif;background:#EDE0F5;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:28px 20px 60px}
+
+/* ── STORY BAR ── */
+.story-bar{width:100%;max-width:960px;margin-bottom:24px}
+.story-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.story-title{font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--plum-mid)}
+.story-counter{font-size:11px;font-weight:600;color:var(--text-muted)}
+.story-steps{display:flex;align-items:center}
+.sstep{display:flex;flex-direction:column;align-items:center;flex:1;position:relative}
+.sstep:not(:last-child)::after{content:'';position:absolute;top:13px;left:50%;width:100%;height:2px;background:var(--border);z-index:0}
+.sstep.done::after{background:var(--magenta)}
+.sstep.active::after{background:linear-gradient(to right,var(--magenta),var(--border))}
+.sdot{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;z-index:1;position:relative;transition:all .3s}
+.sdot-todo{background:var(--white);border:2px solid var(--border);color:var(--text-muted)}
+.sdot-active{background:var(--magenta);border:2px solid var(--magenta);color:#fff;box-shadow:0 0 0 4px rgba(196,50,122,.18)}
+.sdot-done{background:var(--magenta);border:2px solid var(--magenta);color:#fff}
+.slabel{font-size:9.5px;font-weight:600;color:var(--text-muted);margin-top:5px;text-align:center;line-height:1.3}
+.slabel.active{color:var(--magenta)}
+.slabel.done{color:var(--plum-mid)}
+
+/* ── CARD ── */
+.card-shell{width:100%;max-width:960px;background:var(--white);border-radius:16px;overflow:hidden;box-shadow:0 8px 40px rgba(61,26,74,.13)}
+.screen{display:none}
+.screen.active{display:block;animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── CHROME ── */
+.chrome{padding:13px 24px;display:flex;align-items:center;justify-content:space-between}
+.chrome-dark{background:var(--navy)}
+.chrome-plum{background:var(--plum)}
+.chrome-logo{font-size:16px;font-weight:800;color:#fff}
+.chrome-logo span{color:var(--magenta)}
+.chrome-sub{font-size:11px;color:rgba(255,255,255,.4);margin-left:10px}
+.chrome-right{font-size:11px;color:rgba(255,255,255,.5);display:flex;align-items:center;gap:6px}
+.pulse-dot{width:7px;height:7px;border-radius:50%;background:#4ADE80;animation:pulse 2s ease infinite;display:inline-block}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* ── HEROES ── */
+.hero{padding:32px 36px;color:#fff}
+.hero-dark{background:linear-gradient(135deg,var(--navy) 0%,#1A2A42 55%,#0D3B34 130%)}
+.hero-plum{background:linear-gradient(135deg,var(--plum) 0%,var(--plum-mid) 55%,var(--magenta) 130%)}
+.hero-teal{background:linear-gradient(135deg,#0A2A24 0%,var(--teal) 130%)}
+.hero-deep{background:linear-gradient(135deg,#0A0A1E 0%,#1A0A2E 50%,#0A2A24 130%)}
+.hero-eye{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:8px}
+.hero-h{font-size:26px;font-weight:800;line-height:1.2;margin-bottom:10px}
+.hero-sub{font-size:13.5px;color:rgba(255,255,255,.72);line-height:1.7;max-width:720px}
+.hero-stats{display:flex;gap:32px;margin-top:18px;padding-top:18px;border-top:1px solid rgba(255,255,255,.1)}
+.hstat-n{font-size:24px;font-weight:800;color:#fff}
+.hstat-l{font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.6px;margin-top:2px}
+
+/* ── BODY ── */
+.body{padding:28px 36px}
+
+/* ── SEC LABEL ── */
+.sec-label{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-muted);display:flex;align-items:center;gap:8px;margin-bottom:16px}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── PROBLEM STATS ── */
+.problem-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px}
+.problem-card{border-radius:12px;padding:18px 20px;text-align:center;border:1.5px solid var(--border)}
+.problem-n{font-size:32px;font-weight:800;margin-bottom:6px}
+.problem-n-red{color:#DC2626}
+.problem-n-amber{color:var(--amber)}
+.problem-n-plum{color:var(--plum-mid)}
+.problem-label{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px}
+.problem-sub{font-size:11.5px;color:var(--text-muted);line-height:1.55}
+
+/* ── VERTICAL CARDS ── */
+.vertical-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px}
+.v-card{border-radius:12px;overflow:hidden;border:1.5px solid var(--border)}
+.v-card-head{padding:14px 16px;color:#fff}
+.v-head-patient{background:linear-gradient(135deg,var(--plum),var(--magenta))}
+.v-head-clinical{background:linear-gradient(135deg,#0A2A24,var(--teal))}
+.v-head-curriculum{background:linear-gradient(135deg,var(--plum-mid),var(--plum-light))}
+.v-card-label{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:3px}
+.v-card-title{font-size:14px;font-weight:800}
+.v-card-body{padding:14px 16px;background:var(--cream)}
+.v-data-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;color:var(--text-mid)}
+.v-data-row:last-child{border-bottom:none}
+.v-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.v-dot-mag{background:var(--magenta)}
+.v-dot-teal{background:var(--teal)}
+.v-dot-plum{background:var(--plum-light)}
+.v-count{margin-left:auto;font-size:10px;font-weight:700;color:var(--text-muted)}
+
+/* ── REPOSITORY DOMAINS ── */
+.repo-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:22px}
+.repo-card{border-radius:12px;padding:18px 20px;border:1.5px solid var(--border);position:relative;overflow:hidden}
+.repo-card-current{background:var(--mag-pale);border-color:rgba(196,50,122,.3)}
+.repo-card-next{background:var(--teal-pale);border-color:rgba(13,122,110,.25)}
+.repo-card-future{background:var(--lavender);border-color:rgba(92,45,110,.25)}
+.repo-card-horizon{background:linear-gradient(135deg,rgba(15,26,46,.04),rgba(13,122,110,.06));border-color:rgba(29,78,216,.2)}
+.repo-stage{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.repo-stage-current{color:var(--magenta)}
+.repo-stage-next{color:var(--teal)}
+.repo-stage-future{color:var(--plum-mid)}
+.repo-stage-horizon{color:var(--blue)}
+.repo-h{font-size:15px;font-weight:800;color:var(--text);margin-bottom:8px}
+.repo-items{display:flex;flex-direction:column;gap:5px}
+.repo-item{font-size:12px;color:var(--text-mid);display:flex;align-items:center;gap:7px}
+.repo-item::before{content:'';width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.repo-item-current::before{background:var(--magenta)}
+.repo-item-next::before{background:var(--teal)}
+.repo-item-future::before{background:var(--plum-light)}
+.repo-item-horizon::before{background:var(--blue)}
+.repo-badge{position:absolute;top:14px;right:14px;font-size:9px;font-weight:700;padding:3px 8px;border-radius:8px}
+.repo-badge-live{background:var(--green-light);color:var(--green)}
+.repo-badge-building{background:var(--amber-light);color:var(--amber)}
+.repo-badge-roadmap{background:var(--lavender);color:var(--plum-mid)}
+.repo-badge-vision{background:var(--blue-light);color:var(--blue)}
+
+/* ── SCALE CAPABILITIES ── */
+.scale-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:22px}
+.scale-card{border-radius:12px;padding:18px 20px;border:1.5px solid var(--border);background:var(--cream)}
+.scale-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:18px;font-weight:800}
+.scale-icon-teal{background:var(--teal-light);color:var(--teal)}
+.scale-icon-mag{background:var(--mag-pale);color:var(--magenta)}
+.scale-icon-plum{background:var(--lavender);color:var(--plum-mid)}
+.scale-icon-green{background:var(--green-light);color:var(--green)}
+.scale-h{font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px}
+.scale-p{font-size:12px;color:var(--text-muted);line-height:1.65}
+
+/* ── VISION STATEMENT ── */
+.vision-wrap{background:var(--navy);border-radius:14px;padding:28px 32px;margin-bottom:20px;color:#fff}
+.vision-eye{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:10px}
+.vision-h{font-size:22px;font-weight:800;line-height:1.3;margin-bottom:12px}
+.vision-h span{color:#4ADE80}
+.vision-p{font-size:13px;color:rgba(255,255,255,.65);line-height:1.75;max-width:700px}
+
+/* ── COMPARATORS ── */
+.comp-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px}
+.comp-card{border-radius:12px;padding:18px 20px;border:1.5px solid var(--border)}
+.comp-card-today{background:var(--mag-pale);border-color:rgba(196,50,122,.3)}
+.comp-card-tomorrow{background:var(--teal-pale);border-color:rgba(13,122,110,.3)}
+.comp-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+.comp-label-today{color:var(--magenta)}
+.comp-label-tomorrow{color:var(--teal)}
+.comp-h{font-size:15px;font-weight:800;color:var(--text);margin-bottom:10px}
+.comp-items{display:flex;flex-direction:column;gap:7px}
+.comp-item{font-size:12.5px;color:var(--text-mid);display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+.comp-check{font-size:11px;font-weight:700;width:16px;flex-shrink:0;margin-top:1px}
+.comp-check-mag{color:var(--magenta)}
+.comp-check-teal{color:var(--teal)}
+
+/* ── IRB BADGE ── */
+.irb-banner{display:flex;align-items:center;gap:14px;background:var(--navy);border-radius:12px;padding:14px 18px;margin-bottom:16px}
+.irb-icon{width:38px;height:38px;border-radius:8px;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.25);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#4ADE80;flex-shrink:0}
+.irb-h{font-size:13px;font-weight:700;color:#fff;margin-bottom:2px}
+.irb-p{font-size:11px;color:rgba(255,255,255,.5);line-height:1.5}
+
+/* ── BTN ── */
+.btn{display:block;width:100%;padding:13px;background:var(--magenta);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;text-align:center;transition:background .15s;margin-top:4px}
+.btn:hover{background:#a8276a}
+.btn-teal{background:var(--teal)}
+.btn-teal:hover{background:#0a6860}
+.btn-navy{background:var(--navy)}
+.btn-navy:hover{background:var(--navy-mid)}
+.btn-deep{background:linear-gradient(135deg,var(--plum),var(--teal))}
+</style>
+</head>
+<body>
+
+<!-- STORY BAR -->
+<div class="story-bar">
+  <div class="story-top">
+    <div class="story-title">VULVAi · Research Repository</div>
+    <div class="story-counter" id="step-counter">Step 1 of 4</div>
+  </div>
+  <div class="story-steps">
+    <div class="sstep active" id="dot-1"><div class="sdot sdot-active">1</div><div class="slabel active">What we<br>capture</div></div>
+    <div class="sstep" id="dot-2"><div class="sdot sdot-todo">2</div><div class="slabel">The<br>repository</div></div>
+    <div class="sstep" id="dot-3"><div class="sdot sdot-todo">3</div><div class="slabel">What this<br>enables</div></div>
+    <div class="sstep" id="dot-4"><div class="sdot sdot-todo">4</div><div class="slabel">The<br>vision</div></div>
+  </div>
+</div>
+
+<div class="card-shell">
+
+<!-- ══════════════════════════════
+     S2 — WHAT WE CAPTURE
+══════════════════════════════ -->
+<div class="screen active" id="s1">
+  <div class="chrome chrome-plum">
+    <div><span class="chrome-logo">VULV<span>Ai</span></span><span class="chrome-sub">Data capture</span></div>
+    <div class="chrome-right">3 verticals · 1 dataset</div>
+  </div>
+  <div class="hero hero-plum">
+    <div class="hero-eye">What we capture</div>
+    <div class="hero-h">Three products. One research engine. Capturing data no one else has.</div>
+    <div class="hero-sub">Every patient interaction, clinical visit, and physician training session generates structured, longitudinal data under IRB protocol. The data is de-identified, consent-driven, and purpose-built for research — not retrofitted from an EHR.</div>
+    <div class="hero-stats">
+      <div><div class="hstat-n">1.1M+</div><div class="hstat-l">Data points collected to date</div></div>
+      <div><div class="hstat-n">847</div><div class="hstat-l">Active patients in study</div></div>
+      <div><div class="hstat-n">94%</div><div class="hstat-l">Research consent rate</div></div>
+    </div>
+  </div>
+  <div class="body">
+    <div class="sec-label">Data flowing in from all three verticals</div>
+    <div class="vertical-grid">
+      <div class="v-card">
+        <div class="v-card-head v-head-patient">
+          <div class="v-card-label">Patient app</div>
+          <div class="v-card-title">Symptom + cycle data</div>
+        </div>
+        <div class="v-card-body">
+          <div class="v-data-row"><div class="v-dot v-dot-mag"></div>Daily symptom severity scores<div class="v-count">Daily</div></div>
+          <div class="v-data-row"><div class="v-dot v-dot-mag"></div>Cycle phase correlation<div class="v-count">Monthly</div></div>
+          <div class="v-data-row"><div class="v-dot v-dot-mag"></div>Treatment adherence + response<div class="v-count">Weekly</div></div>
+          <div class="v-data-row"><div class="v-dot v-dot-mag"></div>Time-to-diagnosis journeys<div class="v-count">Per patient</div></div>
+          <div class="v-data-row"><div class="v-dot v-dot-mag"></div>Patient empowerment scores<div class="v-count">Monthly</div></div>
+        </div>
+      </div>
+      <div class="v-card">
+        <div class="v-card-head v-head-clinical">
+          <div class="v-card-label">Digital clinic</div>
+          <div class="v-card-title">Diagnostic + lab data</div>
+        </div>
+        <div class="v-card-body">
+          <div class="v-data-row"><div class="v-dot v-dot-teal"></div>Confirmed diagnoses + ICD codes<div class="v-count">Per visit</div></div>
+          <div class="v-data-row"><div class="v-dot v-dot-teal"></div>Full hormone panels (T, E2, SHBG, DHEA-S)<div class="v-count">Per visit</div></div>
+          <div class="v-data-row"><div class="v-dot v-dot-teal"></div>Q-tip test results + severity<div class="v-count">Per exam</div></div>
+          <div class="v-data-row"><div class="v-dot v-dot-teal"></div>Urine cultures + resistance patterns<div class="v-count">Per visit</div></div>
+          <div class="v-data-row"><div class="v-dot v-dot-teal"></div>Treatment outcomes at 6 + 12 weeks<div class="v-count">Follow-up</div></div>
+        </div>
+      </div>
+      <div class="v-card">
+        <div class="v-card-head v-head-curriculum">
+          <div class="v-card-label">Smart curriculum</div>
+          <div class="v-card-title">Physician knowledge data</div>
+        </div>
+        <div class="v-card-body">
+          <div class="v-data-row"><div class="v-dot v-dot-plum"></div>Knowledge gaps by specialty<div class="v-count">Per quiz</div></div>
+          <div class="v-data-row"><div class="v-dot v-dot-plum"></div>Clinical reasoning patterns<div class="v-count">Per case</div></div>
+          <div class="v-data-row"><div class="v-dot v-dot-plum"></div>Literature gaps identified<div class="v-count">Every 6 mo</div></div>
+          <div class="v-data-row"><div class="v-dot v-dot-plum"></div>CME completion + retention<div class="v-count">Per module</div></div>
+          <div class="v-data-row"><div class="v-dot v-dot-plum"></div>Post-training practice change<div class="v-count">3-month f/u</div></div>
+        </div>
+      </div>
+    </div>
+    <button class="btn" onclick="go(2)">See the repository we're building →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     S3 — THE REPOSITORY
+══════════════════════════════ -->
+<div class="screen" id="s2">
+  <div class="chrome chrome-dark">
+    <div><span class="chrome-logo">VULV<span>Ai</span></span><span class="chrome-sub">Data repository</span></div>
+    <div class="chrome-right"><span class="pulse-dot"></span> Expanding continuously</div>
+  </div>
+  <div class="hero hero-teal">
+    <div class="hero-eye">The repository</div>
+    <div class="hero-h">We start with pelvic conditions. We scale to all of women's gynecologic health.</div>
+    <div class="hero-sub">The first condition — vestibulodynia — is the proof of concept. It proves that VULVAi's three-vertical model can capture structured, longitudinal, research-grade data from symptoms to diagnosis to outcomes. Every subsequent condition adds a new layer to the same infrastructure.</div>
+  </div>
+  <div class="body">
+    <div class="sec-label">Repository domains — current and expanding</div>
+    <div class="repo-grid">
+      <div class="repo-card repo-card-current">
+        <span class="repo-badge repo-badge-live">Live now</span>
+        <div class="repo-stage repo-stage-current">Pelvic conditions</div>
+        <div class="repo-h">Vulvovaginal & urologic health</div>
+        <div class="repo-items">
+          <div class="repo-item repo-item-current">Vestibulodynia — confirmed diagnoses, hormone panels, treatment outcomes</div>
+          <div class="repo-item repo-item-current">Recurrent UTI — culture data, antibiotic resistance patterns, misdiagnosis rates</div>
+          <div class="repo-item repo-item-current">Pelvic floor dysfunction — exam findings, PT outcomes, severity scoring</div>
+          <div class="repo-item repo-item-current">Interstitial cystitis — symptom patterns, diagnostic pathway, treatment response</div>
+        </div>
+      </div>
+      <div class="repo-card repo-card-next">
+        <span class="repo-badge repo-badge-building">Building</span>
+        <div class="repo-stage repo-stage-next">Hormonal health</div>
+        <div class="repo-h">Endocrine + reproductive</div>
+        <div class="repo-items">
+          <div class="repo-item repo-item-next">Hormonal contraceptive effects — testosterone, SHBG, estradiol at population scale</div>
+          <div class="repo-item repo-item-next">Perimenopause + menopause — longitudinal hormonal transition mapping</div>
+          <div class="repo-item repo-item-next">PCOS — androgen profiles, metabolic markers, symptom burden</div>
+          <div class="repo-item repo-item-next">Thyroid + adrenal interactions with pelvic health</div>
+        </div>
+      </div>
+      <div class="repo-card repo-card-future">
+        <span class="repo-badge repo-badge-roadmap">Roadmap</span>
+        <div class="repo-stage repo-stage-future">Uterine health</div>
+        <div class="repo-h">Structural + oncologic</div>
+        <div class="repo-items">
+          <div class="repo-item repo-item-future">Endometriosis — symptom onset, diagnostic delay, surgical outcomes</div>
+          <div class="repo-item repo-item-future">Fibroids — symptom burden, treatment pathways, recurrence</div>
+          <div class="repo-item repo-item-future">Adenomyosis — imaging-confirmed cases, quality of life data</div>
+          <div class="repo-item repo-item-future">Cervical health — screening patterns, HPV outcomes, access gaps</div>
+        </div>
+      </div>
+      <div class="repo-card repo-card-horizon">
+        <span class="repo-badge repo-badge-vision">Vision</span>
+        <div class="repo-stage repo-stage-horizon">The full picture</div>
+        <div class="repo-h">Whole-person gynecologic health</div>
+        <div class="repo-items">
+          <div class="repo-item repo-item-horizon">Pregnancy + postpartum — pelvic floor recovery, hormonal trajectories</div>
+          <div class="repo-item repo-item-horizon">Sexual health — longitudinal function, treatment outcomes</div>
+          <div class="repo-item repo-item-horizon">Racial + socioeconomic disparities — access, time-to-diagnosis, outcomes</div>
+          <div class="repo-item repo-item-horizon">Microbiome — vaginal health, UTI resistance, treatment correlation</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-teal" onclick="go(3)">See what this enables →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     S4 — WHAT THIS ENABLES
+══════════════════════════════ -->
+<div class="screen" id="s3">
+  <div class="chrome chrome-plum">
+    <div><span class="chrome-logo">VULV<span>Ai</span></span><span class="chrome-sub">Research capabilities</span></div>
+    <div class="chrome-right">At scale</div>
+  </div>
+  <div class="hero hero-plum">
+    <div class="hero-eye">What this enables</div>
+    <div class="hero-h">From a diagnostic tool to a research platform for all of women's health.</div>
+    <div class="hero-sub">Once the data infrastructure exists, it unlocks capabilities that are impossible without it — large-scale questionnaires, population-level databases, real-world evidence studies, and eventually the clinical trials that women have been excluded from for decades.</div>
+  </div>
+  <div class="body">
+    <div class="sec-label">Research capabilities unlocked by the repository</div>
+    <div class="scale-grid">
+      <div class="scale-card">
+        <div class="scale-icon scale-icon-mag">DB</div>
+        <div class="scale-h">Large-scale longitudinal databases</div>
+        <div class="scale-p">The first structured, consent-driven, longitudinal database linking symptoms, hormones, confirmed diagnoses, and treatment outcomes in women's gynecologic health. Built from primary data — not EHR abstraction or insurance claims.</div>
+      </div>
+      <div class="scale-card">
+        <div class="scale-icon scale-icon-teal">Q</div>
+        <div class="scale-h">Population-scale questionnaires</div>
+        <div class="scale-p">Embedded research surveys across 847+ active patients — scaling to millions as the platform grows. Every questionnaire is standardized, validated, and linked to clinical outcomes. No recruitment cost. No response bias from self-selected research populations.</div>
+      </div>
+      <div class="scale-card">
+        <div class="scale-icon scale-icon-plum">RWE</div>
+        <div class="scale-h">Real-world evidence studies</div>
+        <div class="scale-p">Pharma, medical device, and biotech companies need real-world evidence on how women respond to treatments. VULVAi's longitudinal dataset — with confirmed diagnoses, hormone panels, and treatment outcomes — is exactly this. No dataset like it exists.</div>
+      </div>
+      <div class="scale-card">
+        <div class="scale-icon scale-icon-green">↺</div>
+        <div class="scale-h">Pragmatic clinical trials</div>
+        <div class="scale-p">With an existing consented patient population, confirmed diagnoses, and longitudinal tracking already in place — VULVAi can run pragmatic trials at a fraction of traditional cost. The recruitment problem is solved before the trial begins.</div>
+      </div>
+    </div>
+    <div class="comp-grid">
+      <div class="comp-card comp-card-today">
+        <div class="comp-label comp-label-today">Traditional research model</div>
+        <div class="comp-h">Slow, expensive, fragmented</div>
+        <div class="comp-items">
+          <div class="comp-item"><span class="comp-check comp-check-mag">✗</span>Years of recruitment to build a cohort</div>
+          <div class="comp-item"><span class="comp-check comp-check-mag">✗</span>Data fragmented across EHRs and specialties</div>
+          <div class="comp-item"><span class="comp-check comp-check-mag">✗</span>No longitudinal linkage between symptoms and outcomes</div>
+          <div class="comp-item"><span class="comp-check comp-check-mag">✗</span>Women underrepresented or excluded</div>
+        </div>
+      </div>
+      <div class="comp-card comp-card-tomorrow">
+        <div class="comp-label comp-label-tomorrow">VULVAi research model</div>
+        <div class="comp-h">Built-in, scalable, longitudinal</div>
+        <div class="comp-items">
+          <div class="comp-item"><span class="comp-check comp-check-teal">✓</span>Cohort grows automatically with platform usage</div>
+          <div class="comp-item"><span class="comp-check comp-check-teal">✓</span>Unified dataset across symptoms, labs, and outcomes</div>
+          <div class="comp-item"><span class="comp-check comp-check-teal">✓</span>Longitudinal by design — every data point is timestamped</div>
+          <div class="comp-item"><span class="comp-check comp-check-teal">✓</span>Women are the entire population</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn" onclick="go(4)">See the vision →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     S5 — THE VISION
+══════════════════════════════ -->
+<div class="screen" id="s4">
+  <div class="chrome chrome-dark">
+    <div><span class="chrome-logo">VULV<span>Ai</span></span><span class="chrome-sub">The vision</span></div>
+    <div class="chrome-right"><span class="pulse-dot"></span> Building the infrastructure</div>
+  </div>
+  <div class="hero hero-deep">
+    <div class="hero-eye">The vision</div>
+    <div class="hero-h">VULVAi is not just a diagnostic tool.<br>It is the research backbone of women's gynecologic health.</div>
+    <div class="hero-sub">Every condition we add, every patient we enroll, every physician we train makes the dataset more powerful. The infrastructure we're building today will support the clinical trials, population databases, and real-world evidence studies that women's health has never had — and desperately needs.</div>
+  </div>
+  <div class="body">
+    <div class="vision-wrap">
+      <div class="vision-eye">The compound effect</div>
+      <div class="vision-h">More patients → better data → <span>stronger science</span> → better care → more patients</div>
+      <div class="vision-p">This is not a product with a research feature. This is a research platform that happens to deliver direct value to patients and physicians along the way. Every interaction — a patient logging her symptoms, a doctor confirming a diagnosis, a resident answering a quiz question — is a data point entering the most comprehensive longitudinal database in women's gynecologic health. No competitor can buy this. It has to be built. And we are building it.</div>
+    </div>
+
+    <div class="sec-label">Where we are. Where we're going.</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px">
+      <div style="background:var(--mag-pale);border-radius:10px;padding:14px 16px;text-align:center;border:1.5px solid rgba(196,50,122,.25)">
+        <div style="font-size:22px;font-weight:800;color:var(--magenta);margin-bottom:4px">1.1M+</div>
+        <div style="font-size:11px;color:var(--text-muted);line-height:1.4">Data points collected today</div>
+      </div>
+      <div style="background:var(--teal-pale);border-radius:10px;padding:14px 16px;text-align:center;border:1.5px solid rgba(13,122,110,.25)">
+        <div style="font-size:22px;font-weight:800;color:var(--teal);margin-bottom:4px">3</div>
+        <div style="font-size:11px;color:var(--text-muted);line-height:1.4">Published peer-reviewed papers</div>
+      </div>
+      <div style="background:var(--lavender);border-radius:10px;padding:14px 16px;text-align:center;border:1.5px solid rgba(92,45,110,.25)">
+        <div style="font-size:22px;font-weight:800;color:var(--plum-mid);margin-bottom:4px">15+</div>
+        <div style="font-size:11px;color:var(--text-muted);line-height:1.4">Studies in pipeline — TriNetX + COSMOS Epic</div>
+      </div>
+      <div style="background:var(--green-light);border-radius:10px;padding:14px 16px;text-align:center;border:1.5px solid rgba(22,101,52,.2)">
+        <div style="font-size:22px;font-weight:800;color:var(--green);margin-bottom:4px">IRB</div>
+        <div style="font-size:11px;color:var(--text-muted);line-height:1.4">Active protocol — years of regulatory work done</div>
+      </div>
+    </div>
+
+    <div class="irb-banner">
+      <div class="irb-icon">↑</div>
+      <div>
+        <div class="irb-h">The data advantage is already compounding</div>
+        <div class="irb-p">We have TriNetX and COSMOS Epic database access for population-scale validation. We have an active IRB protocol. We have 3 published papers and 15+ in the pipeline. The infrastructure exists. The only question is how fast we can scale it to new conditions — and new populations.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /card-shell -->
+
+<script>
+var cur = 1;
+function go(n) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  var t = document.getElementById('s' + n);
+  if (t) { t.classList.add('active'); cur = n; }
+  updateBar(n);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function updateBar(n) {
+  document.getElementById('step-counter').textContent = 'Step ' + n + ' of 4';
+  for (var i = 1; i <= 4; i++) {
+    var dot = document.getElementById('dot-' + i);
+    if (!dot) continue;
+    var d = dot.querySelector('.sdot'), l = dot.querySelector('.slabel');
+    dot.className = 'sstep';
+    if (i < n) {
+      dot.classList.add('done');
+      d.className = 'sdot sdot-done'; d.textContent = '✓'; l.className = 'slabel done';
+    } else if (i === n) {
+      dot.classList.add('active');
+      d.className = 'sdot sdot-active'; d.textContent = i; l.className = 'slabel active';
+    } else {
+      d.className = 'sdot sdot-todo'; d.textContent = i; l.className = 'slabel';
+    }
+  }
+}
+</script>
+</body>
+</html>
